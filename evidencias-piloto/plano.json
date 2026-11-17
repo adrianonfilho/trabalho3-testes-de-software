@@ -1,0 +1,11 @@
+{
+  "tipo": "piloto",
+  "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+  "parametros": {
+    "model": "openai/gpt-oss-120b",
+    "temperature": 0,
+    "max_completion_tokens": 4096,
+    "reasoning_effort": "low",
+    "stream": false
+  }
+}

@@ -1,0 +1,2 @@
+# Python 3.9 ou superior.
+# Os scripts usam somente a biblioteca padrão do Python.

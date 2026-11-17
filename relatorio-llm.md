@@ -4,8 +4,8 @@ Substituam os campos entre colchetes. Preservem os títulos, os nomes dos perfis
 
 ## Identificação e ambiente
 
-- Integrantes: [nomes completos da dupla ou trio]
-- artifactId: [valor no pom.xml]
+- Integrantes: ADRIANO NOBREGA AZEVEDO FILHO e FRANCISCO EDSON DA COSTA FILHO
+- artifactId: AdrianoNobrega-FranciscoEdson
 - Java: [versão]
 - Maven: [versão]
 - Sistema operacional: [nome e versão]

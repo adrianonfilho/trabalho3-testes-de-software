@@ -72,9 +72,9 @@ O uso do script e da API é obrigatório nas quatro condições. O manifesto ide
 | Semana | Entrega | Marco a conferir |
 |---|---|---|
 | 1 — 17/11 | Configuração do acesso à LLM via API | O piloto exibe `piloto: ok` e salva a evidência da consulta em `evidencias-piloto/`. |
-| 2 | Informações produzidas pela aplicação dos critérios de teste | As análises caixa-preta e caixa-branca das três funcionalidades registram classes de equivalência, valores-limite, regras de decisão e obrigações de cobertura aplicáveis. |
-| 3 | Prompts completos e dados iniciais | O grupo entrega o plano com os 12 prompts de ablação e o manifesto. Os prompts são congelados antes das consultas oficiais. Os dados iniciais incluem as primeiras requisições, respostas e medições disponíveis. |
-| 4 | Entrega final | O projeto inclui as 12 suítes, as evidências de execução e o relatório com métricas, comparação com EvoSuite e discussão das ablações. |
+| 2 — 24/11 | Informações produzidas pela aplicação dos critérios de teste | As análises caixa-preta e caixa-branca das três funcionalidades registram classes de equivalência, valores-limite, regras de decisão e obrigações de cobertura aplicáveis. |
+| 3 — 01/12 | Prompts completos e dados iniciais | O grupo entrega o plano com os 12 prompts de ablação e o manifesto. Os prompts são congelados antes das consultas oficiais. Os dados iniciais incluem as primeiras requisições, respostas e medições disponíveis. |
+| 4 — 08/12 | Entrega final | O projeto inclui as 12 suítes, as evidências de execução e o relatório com métricas, comparação com EvoSuite e discussão das ablações. |
 
 Entreguem uma versão cumulativa a cada semana.
 

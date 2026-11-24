@@ -158,17 +158,99 @@ class SemRedirecionamento(HTTPRedirectHandler):
         return None
 
 
+def duracao_em_segundos(valor):
+    """Converte valores como '7.66s', '2m59.56s' ou '1h2m'."""
+    if valor is None:
+        return None
+
+    texto = str(valor).strip().lower()
+    try:
+        segundos = float(texto)
+    except ValueError:
+        partes = re.findall(r"(\d+(?:\.\d+)?)(ms|s|m|h|d)", texto)
+        if not partes or "".join(n + u for n, u in partes) != texto:
+            return None
+        fatores = {"ms": 0.001, "s": 1, "m": 60, "h": 3600, "d": 86400}
+        segundos = sum(float(n) * fatores[u] for n, u in partes)
+
+    return segundos if math.isfinite(segundos) and segundos >= 0 else None
+
+
+class ControleTokens:
+    def __init__(self):
+        self.restantes = None
+        self.renova_em = None
+
+    def atualizar(self, headers):
+        headers = {k.lower(): v for k, v in headers.items()}
+        try:
+            restantes = int(headers["x-ratelimit-remaining-tokens"])
+        except (KeyError, TypeError, ValueError):
+            self.restantes = None
+            self.renova_em = None
+            return
+
+        duracao = duracao_em_segundos(headers.get("x-ratelimit-reset-tokens"))
+        self.restantes = max(0, restantes)
+        # Sem prazo válido, usa 90 segundos e um segundo de margem.
+        self.renova_em = time.monotonic() + (duracao if duracao is not None else 90) + 1
+
+    def aguardar(self, corpo):
+        if self.restantes is None:
+            return
+
+        agora_monotonico = time.monotonic()
+        if agora_monotonico >= self.renova_em:
+            self.restantes = None
+            self.renova_em = None
+            return
+
+        dados = json.loads(corpo)
+        # Heurística para prompts textuais; não substitui o tokenizador do modelo.
+        bytes_entrada = sum(
+            len(mensagem.get("content", "").encode("utf-8"))
+            for mensagem in dados.get("messages", [])
+        )
+        tokens_entrada = math.ceil(bytes_entrada / 3) + 100
+        tokens_saida = int(dados.get("max_completion_tokens", 0))
+        tokens_previstos = math.ceil((tokens_entrada + tokens_saida) * 1.10)
+        if self.restantes >= tokens_previstos:
+            return
+
+        espera = max(0, self.renova_em - agora_monotonico)
+        print(
+            f"Cota restante: {self.restantes} tokens; "
+            f"estimativa da próxima chamada: {tokens_previstos}. "
+            f"Aguardando {espera:.1f}s.",
+            flush=True,
+        )
+        time.sleep(espera)
+        self.restantes = None
+        self.renova_em = None
+
+
+CONTROLE_TOKENS = ControleTokens()
+
+
 def requisitar(corpo, chave):
+    CONTROLE_TOKENS.aguardar(corpo)
     pedido = Request(
         ENDPOINT, data=corpo, method="POST",
         headers={**CABECALHOS, "Authorization": f"Bearer {chave}"},
     )
     try:
         with build_opener(SemRedirecionamento()).open(pedido, timeout=120) as resposta:
-            return resposta.status, resposta.headers, resposta.read()
+            status = resposta.status
+            headers = resposta.headers
+            bruto = resposta.read()
     except HTTPError as erro:
         with erro:
-            return erro.code, erro.headers, erro.read()
+            status = erro.code
+            headers = erro.headers
+            bruto = erro.read()
+
+    CONTROLE_TOKENS.atualizar(headers)
+    return status, headers, bruto
 
 
 def gravar_evento(saida, evento):
